@@ -102,3 +102,12 @@ case when Grade >= 8 Then Name end asc,
 case when Grade < 8 then Marks end asc;
 
 
+select h.hacker_id, h.name from 
+(select s.hacker_id as hacker_id, count(submission_id) as sub_num 
+from Submissions s, Challenges c, Difficulty d 
+where s.challenge_id = c.challenge_id
+and c.difficulty_level = d.difficulty_level
+and s.score = d.score
+group by s.hacker_id having count(submission_id) > 1) a, Hackers h
+where a.hacker_id = h.hacker_id
+order by sub_num desc, h.hacker_id asc;
