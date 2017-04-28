@@ -111,3 +111,57 @@ and s.score = d.score
 group by s.hacker_id having count(submission_id) > 1) a, Hackers h
 where a.hacker_id = h.hacker_id
 order by sub_num desc, h.hacker_id asc;
+
+
+select w.id, p.age, w.coins_needed, t.power
+from
+(select age, power, min(coins_needed) as min_coin from Wands w, Wands_Property p 
+ where w.code = p.code and is_evil = 0 
+ group by age, power) t, Wands w, Wands_Property p
+where t.age = p.age
+and p.code = w.code
+and w.coins_needed = t.min_coin
+order by t.power desc, p.age desc;
+
+
+
+select h.hacker_id, h.name, t.count_challenge from(
+select count_challenge, count(count_challenge) from
+(select hacker_id, count(challenge_id) as count_challenge from Challenges group by hacker_id)
+group by count_challenge
+having count_challenge = max(count_challenge)
+or count(count_challenge) = 1) t, (select hacker_id as hacker_id, count(challenge_id) as count_challenge from Challenges group by hacker_id) m , Hackers h
+where t.count_challenge = m.count_challenge
+and m.hacker_id = h.hacker_id
+order by t.count_challenge desc, hacker_id;
+
+
+
+
+select h.hacker_id, name, t.num from
+(select num from (select num, count(num) as count_num from (select hacker_id, count(challenge_id) as num from Challenges group by hacker_id) group by num)
+where num = (select max(num) from (select hacker_id, count(challenge_id) as num from Challenges group by hacker_id))
+or count_num = 1) t, (select hacker_id, count(challenge_id) as num from Challenges group by hacker_id) m, Hackers h
+where m.num = t.num 
+and h.hacker_id = m.hacker_id
+order by t.num desc, hacker_id;
+
+
+
+select t.hacker_id, name, total_score from
+(select hacker_id, sum(score) as total_score from 
+(select hacker_id, challenge_id, max(score) as score from Submissions group by hacker_id, challenge_id)
+group by hacker_id)t, Hackers h
+where t.hacker_id = h.hacker_id
+and total_score ^= 0
+order by total_score desc, hacker_id asc;
+
+
+
+select Name||'('||substr(Occupation, 1, 1)||')' as output from OCCUPATIONS order by Name;
+
+select 'There are total '||count(Occupation)||' '||lower(Occupation)||'s.' as sentence from Occupations group by occupation order by count(Occupation) asc , occupation;
+
+
+
+
